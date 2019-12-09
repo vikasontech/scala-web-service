@@ -5,9 +5,11 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.PathDirectives.pathPrefix
 import akka.stream.ActorMaterializer
-import org.user.actor.UserDataActor
+import org.user.actor.{UserActivityActor, UserDataActor}
+import org.user.data.UserActivity
+import org.user.repositories.{UserActivityRepository, UserActivityRepositoryImpl}
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.io.StdIn
 
 object WebServer extends App {
@@ -15,7 +17,9 @@ object WebServer extends App {
   private implicit val dispatcher: ExecutionContextExecutor = system.dispatcher
   private implicit val materialize: ActorMaterializer = ActorMaterializer()
 
+  implicit val userActivityRepo = new UserActivityRepositoryImpl()
   implicit val userDataActorRef: ActorRef = system.actorOf(Props(new UserDataActor()))
+
   private val routeConfig = new RouteConfig()
   val routes = {
     pathPrefix("api") {

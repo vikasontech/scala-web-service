@@ -12,7 +12,7 @@ object UserActivityActor {
 }
 
 class UserActivityActor(val userId: String,
-                        val repository: UserActivityRepository)
+                        implicit val repository: UserActivityRepository)
   extends Actor {
 
   implicit val ec: ExecutionContextExecutor = context.dispatcher
