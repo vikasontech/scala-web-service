@@ -47,18 +47,21 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
 
   val postRoute: Route = path("user") {
     post {
+      //TODO: DO SOME OPERATION TO SAVE USER DATA
       executeActorAndSearchData(UserDataActor.Post)
     }
   }
 
   val deleteRoute: Route = path("user") {
     delete {
+      //TODO: DO SOME OPERATION TO DELETE USER DATA
       executeActorAndSearchData(UserDataActor.Delete)
     }
   }
 
   val putRoute: Route = path("user") {
     put {
+      //TODO: DO SOME OPERATION TO UPDATE USER DATA
       executeActorAndSearchData(UserDataActor.Put)
     }
   }

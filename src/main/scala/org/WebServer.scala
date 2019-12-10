@@ -5,11 +5,10 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.PathDirectives.pathPrefix
 import akka.stream.ActorMaterializer
-import org.user.actor.{UserActivityActor, UserDataActor}
-import org.user.data.UserActivity
-import org.user.repositories.{UserActivityRepository, UserActivityRepositoryImpl}
+import org.user.actor.UserDataActor
+import org.user.repositories.UserActivityRepositoryImpl
 
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
 object WebServer extends App {
@@ -33,7 +32,7 @@ object WebServer extends App {
   }
   val serverFuture = Http().bindAndHandle(routes, "localhost", 8080)
 
-  println("Server started ....")
+  println("Server started ...")
   StdIn.readLine()
   serverFuture
     .flatMap(_.unbind())
