@@ -23,10 +23,11 @@ object WebServer extends App {
   val routes = {
     pathPrefix("api") {
       concat(
-        routeConfig.getRoute,
-        routeConfig.postRoute,
-        routeConfig.deleteRoute,
-        routeConfig.putRoute
+        routeConfig.getRoute
+//        ,
+//        routeConfig.postRoute,
+//        routeConfig.deleteRoute,
+//        routeConfig.putRoute
       )
     }
   }

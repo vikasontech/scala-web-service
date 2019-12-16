@@ -1,92 +1,65 @@
 package org
 
 import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.Directives.{delete, get, path, post, put, _}
 import akka.http.scaladsl.server.directives.{PathDirectives, RouteDirectives}
 import akka.http.scaladsl.server.{Route, StandardRoute}
 import akka.pattern.Patterns
+import akka.stream.ActorMaterializer
 import org.db.doc.Employee
-import org.user.actor.{EmployeeActor, SEARCH_ALL}
+import org.domain.EmployeeRequest
+import org.user.actor.{EmployeeActor, SAVE, SEARCH_ALL}
+import spray.json.DefaultJsonProtocol
 //import org.db.{Employee, EmployeeActor}
 //import org.service.{EmployeeActor, SEARCH_ALL}
-import org.user.actor.{UserActivityActor, UserDataActor}
-import org.user.data.{UserActivity, UserData}
-import org.user.repositories.UserActivityRepositoryImpl
+//import org.user.actor.{UserActivityActor, UserDataActor}
+//import org.user.data.{UserActivity, UserData}
+//import org.user.repositories.UserActivityRepositoryImpl
 import org.utils.{JsonUtils, TimeUtils}
 import spray.json.JsValue
 
 import scala.concurrent.Await
+import spray.json.DefaultJsonProtocol._
+import spray.json.RootJsonFormat
 
+
+trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
+  import org.utils.JsonUtils._
+  implicit val employeeFormat = jsonFormat2(Employee)
+  implicit val employeeRequestFormat = jsonFormat2(EmployeeRequest)
+}
 
 class RouteConfig(implicit val userDataActorRef: ActorRef,
-                  implicit val system: ActorSystem) {
+                  implicit val system: ActorSystem) extends JsonSupport{
+  val employeeActor = system.actorOf(Props(new EmployeeActor()))
+//  implicit val employeef = DefaultJsonProtocol.jsonFormat2(Employee)
 
+  implicit val mat = ActorMaterializer()
 
   val getRoute: Route =
 
     PathDirectives.pathPrefix("user") {
       concat(
-        path("activity") {
-          get {
-
-            val userData = findData(UserDataActor.Get)
-
-            val userActivityActorRef: ActorRef =
-              system.actorOf(Props(new UserActivityActor(userData.data, new UserActivityRepositoryImpl())))
-
-            val activity: UserActivity = findUserActivityData(userActivityActorRef)
-            RouteDirectives.complete(HttpEntity(activity.toString))
-          }
-        },
         path("find") {
           get {
-            val tryAkkaActorRef = system.actorOf(Props(new EmployeeActor()))
-            val returnValue = Patterns.ask(tryAkkaActorRef, SEARCH_ALL, TimeUtils.timeoutMills)
+            val returnValue = Patterns.ask(employeeActor, SEARCH_ALL, TimeUtils.timeoutMills)
             val result: Seq[Employee] = Await.result(returnValue, TimeUtils.atMostDuration).asInstanceOf[Seq[Employee]]
             val json: JsValue = JsonUtils.getJsonValue(result)
             RouteDirectives.complete(HttpEntity(json.toString))
+          }
+        },
+        path("save") {
+          post {
+            entity(as[EmployeeRequest]) { employee =>
+              val future = Patterns.ask(employeeActor, SAVE(employee), TimeUtils.timeoutMills)
+              Await.result(future, TimeUtils.atMostDuration)
+              RouteDirectives.complete(HttpEntity("Data saved successfully!"))
+            }
           }
         }
       )
     }
 
-  private def findUserActivityData(userActivityActorRef: ActorRef): UserActivity = {
-    val resultFuture = Patterns.ask(userActivityActorRef, UserActivityActor.Get, TimeUtils.timeoutMills)
-    val result: List[UserActivity] = Await.result(resultFuture, TimeUtils.atMostDuration).asInstanceOf[List[UserActivity]]
-    val activity: UserActivity = result.head
-    activity
-  }
-
-  val postRoute: Route = path("user") {
-    post {
-      //TODO: DO SOME OPERATION TO SAVE USER DATA
-      executeActorAndSearchData(UserDataActor.Post)
-    }
-  }
-
-  val deleteRoute: Route = path("user") {
-    delete {
-      //TODO: DO SOME OPERATION TO DELETE USER DATA
-      executeActorAndSearchData(UserDataActor.Delete)
-    }
-  }
-
-  val putRoute: Route = path("user") {
-    put {
-      //TODO: DO SOME OPERATION TO UPDATE USER DATA
-      executeActorAndSearchData(UserDataActor.Put)
-    }
-  }
-
-  val executeActorAndSearchData: Any => StandardRoute = (message: Any) => {
-    val result: UserData = findData(message)
-    RouteDirectives.complete(HttpEntity(result.data))
-  }
-
-  private def findData(message: Any) = {
-    val resultFuture = Patterns.ask(userDataActorRef, message, timeoutMillis = TimeUtils.timeoutMills)
-    val result: UserData = Await.result(resultFuture, TimeUtils.atMostDuration).asInstanceOf[UserData]
-    result
-  }
 }
