@@ -3,7 +3,7 @@ package org.utils
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import org.db.Employee
+import org.db.doc.Employee
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, enrichAny}
 import spray.json.DefaultJsonProtocol._
 object JsonUtils {

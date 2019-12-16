@@ -1,22 +1,16 @@
-// ref: https://www.jannikarndt.de/blog/2017/08/writing_case_classes_to_mongodb_in_scala/
-
-package org.db
-
-import java.time.LocalDate
+package org.db.config
 
 import ch.rasc.bsoncodec.math.BigDecimalStringCodec
 import ch.rasc.bsoncodec.time.LocalDateTimeDateCodec
-import com.mongodb.MongoCredential._
+import com.mongodb.MongoCredential.createCredential
 import com.mongodb.{MongoCredential, ServerAddress}
 import org.bson.codecs.configuration.CodecRegistry
-import org.mongodb.scala.{Completed, MongoClientSettings, Observer}
+import org.db.doc.Employee
+import org.mongodb.scala.MongoClientSettings
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.DurationInt
-import scala.jdk.CollectionConverters._
-import scala.language.postfixOps
+import scala.collection.JavaConverters.seqAsJavaListConverter
 
-object DB {
+object DbConfig {
 
   val user: String = "root"
   val password: Array[Char] = "example".toCharArray
@@ -49,37 +43,4 @@ object DB {
 
   val employees: MongoCollection[Employee] = database.getCollection("employee")
 
-}
-
-object EmployeeRepo{
-//  createCollection()
-//  insertData()
-//  findAll()
-  def delEmploy(): Unit = {
-    DB.employees.drop().subscribe(new Observer[Completed] {
-      override def onNext(result: Completed): Unit = print("done")
-
-      override def onError(e: Throwable): Unit = println(e)
-
-      override def onComplete(): Unit = println("complete")
-    })
-  }
-
-  def createCollection(): Unit = {
-    DB.database.createCollection("employee").subscribe(new Observer[Completed] {
-      override def onNext(result: Completed): Unit = println("done")
-
-      override def onError(e: Throwable): Unit = println(e)
-
-      override def onComplete(): Unit = println("complete")
-    })
-  }
-
-  def insertData(emp: Employee): Future[Completed] = {
-     DB.employees.insertOne(emp).toFuture()
-  }
-
-  def findAll(): Future[Seq[Employee]] = {
-    DB.employees.find().toFuture()
-  }
 }

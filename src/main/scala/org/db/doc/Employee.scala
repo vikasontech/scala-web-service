@@ -1,4 +1,4 @@
-package org.db
+package org.db.doc
 
 import java.time.LocalDate
 

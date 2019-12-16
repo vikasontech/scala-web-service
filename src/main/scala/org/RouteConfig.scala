@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives.{delete, get, path, post, put, _}
 import akka.http.scaladsl.server.directives.{PathDirectives, RouteDirectives}
 import akka.http.scaladsl.server.{Route, StandardRoute}
 import akka.pattern.Patterns
-import org.db.Employee
+import org.db.doc.Employee
 import org.user.actor.{EmployeeActor, SEARCH_ALL}
 //import org.db.{Employee, EmployeeActor}
 //import org.service.{EmployeeActor, SEARCH_ALL}

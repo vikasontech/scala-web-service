@@ -1,8 +1,8 @@
 package org.user.actor
 
 import akka.actor.{Actor, ActorLogging}
-import org.db.Employee
-import org.service.{EmployeeService}
+import org.db.doc.Employee
+import org.service.EmployeeService
 
 
 class EmployeeActor extends Actor with ActorLogging {
