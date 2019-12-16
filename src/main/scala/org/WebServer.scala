@@ -34,8 +34,8 @@ object WebServer extends App {
 
   println("Server started ...")
   StdIn.readLine()
-  serverFuture
-    .flatMap(_.unbind())
-    .onComplete(_ => system.terminate())
+//  serverFuture
+//    .flatMap(_.unbind())
+//    .onComplete(_ => system.terminate())
 }
 

@@ -11,7 +11,7 @@ import com.mongodb.{MongoCredential, ServerAddress}
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.{Completed, MongoClientSettings, Observer}
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters._
 import scala.language.postfixOps
@@ -81,9 +81,12 @@ object TestDb extends App {
     Await.result(eventualCompleted, 10.second)
   }
 
-  def findAll(): Unit = {
-    val future = DB.employees.find().toFuture()
-    val value = Await.result(future, 10 seconds)
-    value.foreach(println)
+
+  def insertDataV2(emp: Employee): Future[Completed] = {
+     DB.employees.insertOne(emp).toFuture()
+  }
+
+  def findAll(): Future[Seq[Employee]] = {
+    DB.employees.find().toFuture()
   }
 }
