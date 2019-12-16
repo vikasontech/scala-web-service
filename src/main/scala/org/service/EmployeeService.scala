@@ -1,43 +1,18 @@
-package org.db
+package org.service
 
-import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
-import akka.{Done, NotUsed}
-import akka.actor.{Actor, ActorLogging, ActorSystem}
+import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import org.db.{Employee, EmployeeRepo}
 //import akka.stream.scaladsl.GraphDSL.Implicits.flow2flow
-import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.stream.scaladsl.{Sink, Source}
 //import com.sun.org.apache.xalan.internal.res.XSLTErrorResources
 
 //import scala.collection.{Factory, mutable}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
-
-sealed trait EmployeeActorMessage
-
-case class SAVE(emp: Employee) extends EmployeeActorMessage
-
-case object SEARCH_ALL extends EmployeeActorMessage
-
-class EmployeeActor extends Actor with ActorLogging {
-  private val employeeService = new EmployeeService()
-
-  override def receive: Receive = {
-
-    case SAVE(employee: Employee) =>
-      log.info(s"received message Save with employee $employee")
-      sender ! employeeService.saveEmployeeData(employee)
-
-    case SEARCH_ALL =>
-      log.info(s"received message find all")
-      sender() ! employeeService.findAll
-
-    case _ =>
-      log.debug("Unhandled message!")
-  }
-}
 
 class EmployeeService {
 
@@ -50,7 +25,6 @@ class EmployeeService {
       case Failure(exception) => println(exception.getLocalizedMessage)
       case Success(_) => None
     }
-
 
   def findAll: Seq[Employee] = {
     val value: Future[Seq[Employee]] = Source.future(EmployeeRepo.findAll())

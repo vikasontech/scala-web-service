@@ -6,12 +6,15 @@ import akka.http.scaladsl.server.Directives.{delete, get, path, post, put, _}
 import akka.http.scaladsl.server.directives.{PathDirectives, RouteDirectives}
 import akka.http.scaladsl.server.{Route, StandardRoute}
 import akka.pattern.Patterns
-import org.db.{Employee, SEARCH_ALL, EmployeeActor}
+import org.db.Employee
+import org.user.actor.{EmployeeActor, SEARCH_ALL}
+//import org.db.{Employee, EmployeeActor}
+//import org.service.{EmployeeActor, SEARCH_ALL}
 import org.user.actor.{UserActivityActor, UserDataActor}
 import org.user.data.{UserActivity, UserData}
 import org.user.repositories.UserActivityRepositoryImpl
 import org.utils.{JsonUtils, TimeUtils}
-import spray.json.{JsValue}
+import spray.json.JsValue
 
 import scala.concurrent.Await
 
