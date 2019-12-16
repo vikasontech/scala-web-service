@@ -51,11 +51,10 @@ object DB {
 
 }
 
-object TestDb extends App {
-  createCollection()
-  insertData()
-  findAll()
-
+object EmployeeRepo{
+//  createCollection()
+//  insertData()
+//  findAll()
   def delEmploy(): Unit = {
     DB.employees.drop().subscribe(new Observer[Completed] {
       override def onNext(result: Completed): Unit = print("done")
@@ -76,13 +75,7 @@ object TestDb extends App {
     })
   }
 
-  def insertData(): Completed = {
-    val eventualCompleted = DB.employees.insertOne(new Employee(name = "Jai Shri Ram", LocalDate.of(2019, 12, 12))).toFuture()
-    Await.result(eventualCompleted, 10.second)
-  }
-
-
-  def insertDataV2(emp: Employee): Future[Completed] = {
+  def insertData(emp: Employee): Future[Completed] = {
      DB.employees.insertOne(emp).toFuture()
   }
 

@@ -1,48 +1,28 @@
 package org
 
-import java.time
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.concurrent.TimeUnit
-
-import akka.actor.{ActorRef, ActorSystem, Props, TypedActor}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.server.Directives.{delete, get, path, post, put}
+import akka.http.scaladsl.server.Directives.{delete, get, path, post, put, _}
 import akka.http.scaladsl.server.directives.{PathDirectives, RouteDirectives}
 import akka.http.scaladsl.server.{Route, StandardRoute}
 import akka.pattern.Patterns
-import org.db.{Employee, FindAll, TryAkkaActor, TryAkkaStreams}
+import org.db.{Employee, SEARCH_ALL, EmployeeActor}
 import org.user.actor.{UserActivityActor, UserDataActor}
 import org.user.data.{UserActivity, UserData}
 import org.user.repositories.UserActivityRepositoryImpl
+import org.utils.{JsonUtils, TimeUtils}
+import spray.json.{JsValue}
 
 import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-import akka.http.scaladsl.server.Directives._
-import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, enrichAny}
-import spray.json.DefaultJsonProtocol._
-
-import scala.util.parsing.json.JSONFormat
-
 
 
 class RouteConfig(implicit val userDataActorRef: ActorRef,
                   implicit val system: ActorSystem) {
-  val timeoutMills: Long = 2 * 1000
 
-  implicit object dateFormatter extends JsonFormat[LocalDate] {
-    override def write(obj: LocalDate): JsValue = {
-        JsString(obj.toString)
-    }
 
-    override def read(json: JsValue): LocalDate = {
-      LocalDate.parse(json.toString(), DateTimeFormatter.ISO_DATE)
-    }
-  }
   val getRoute: Route =
 
-
-    PathDirectives.pathPrefix("user"){
+    PathDirectives.pathPrefix("user") {
       concat(
         path("activity") {
           get {
@@ -58,26 +38,19 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
         },
         path("find") {
           get {
-            val tryAkkaActorRef = system.actorOf(Props(new TryAkkaActor()))
-            val returnValue = Patterns.ask(tryAkkaActorRef, FindAll, 10 * 1000)
-
-            val result: Seq[Employee] = Await.result(returnValue, Duration.create(5, TimeUnit.SECONDS)).asInstanceOf[Seq[Employee]]
-            implicit val formatr = DefaultJsonProtocol.jsonFormat2(Employee)
-            val json: JsValue = result.toJson
-            println(json.toString())
+            val tryAkkaActorRef = system.actorOf(Props(new EmployeeActor()))
+            val returnValue = Patterns.ask(tryAkkaActorRef, SEARCH_ALL, TimeUtils.timeoutMills)
+            val result: Seq[Employee] = Await.result(returnValue, TimeUtils.atMostDuration).asInstanceOf[Seq[Employee]]
+            val json: JsValue = JsonUtils.getJsonValue(result)
             RouteDirectives.complete(HttpEntity(json.toString))
           }
         }
       )
     }
 
-
-
-
-
-  private def findUserActivityData(userActivityActorRef: ActorRef) = {
-    val resultFuture = Patterns.ask(userActivityActorRef, UserActivityActor.Get, timeoutMills)
-    val result: List[UserActivity] = Await.result(resultFuture, Duration.create(2, TimeUnit.SECONDS)).asInstanceOf[List[UserActivity]]
+  private def findUserActivityData(userActivityActorRef: ActorRef): UserActivity = {
+    val resultFuture = Patterns.ask(userActivityActorRef, UserActivityActor.Get, TimeUtils.timeoutMills)
+    val result: List[UserActivity] = Await.result(resultFuture, TimeUtils.atMostDuration).asInstanceOf[List[UserActivity]]
     val activity: UserActivity = result.head
     activity
   }
@@ -109,8 +82,8 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
   }
 
   private def findData(message: Any) = {
-    val resultFuture = Patterns.ask(userDataActorRef, message, timeoutMillis = timeoutMills)
-    val result: UserData = Await.result(resultFuture, Duration.create(2, TimeUnit.SECONDS)).asInstanceOf[UserData]
+    val resultFuture = Patterns.ask(userDataActorRef, message, timeoutMillis = TimeUtils.timeoutMills)
+    val result: UserData = Await.result(resultFuture, TimeUtils.atMostDuration).asInstanceOf[UserData]
     result
   }
 }
