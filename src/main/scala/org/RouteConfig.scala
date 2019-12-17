@@ -27,7 +27,7 @@ import spray.json.RootJsonFormat
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   import org.utils.JsonUtils._
-  implicit val employeeFormat = jsonFormat2(Employee)
+  implicit val employeeFormat = jsonFormat3(Employee)
   implicit val employeeRequestFormat = jsonFormat2(EmployeeRequest)
 }
 

@@ -7,6 +7,7 @@ import scala.concurrent.Future
 
 object EmployeeRepo {
 
+
   def delEmploy(): Unit = {
     DbConfig.employees.drop().subscribe((result: Completed) => println(s"$result"),
       (e: Throwable) => println(e.getLocalizedMessage),
@@ -27,4 +28,6 @@ object EmployeeRepo {
   def findAll(): Future[Seq[Employee]] = {
     DbConfig.employees.find().toFuture()
   }
+
+
 }

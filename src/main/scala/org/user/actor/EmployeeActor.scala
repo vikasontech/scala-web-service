@@ -16,8 +16,8 @@ class EmployeeActor extends Actor with ActorLogging {
 
     case SAVE(employee: EmployeeRequest) =>
       log.info(s"received message Save with employee $employee")
-      val employeeDoc:Employee = Employee(name = employee.name, dateOfBirth = LocalDate.parse(employee.dateOfBirth, DateTimeFormatter.ISO_DATE))
-      sender ! employeeService.saveEmployeeData(employeeDoc)
+
+      sender ! employeeService.saveEmployeeData(employee)
 
     case SEARCH_ALL =>
       log.info(s"received message find all")

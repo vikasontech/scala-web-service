@@ -19,7 +19,7 @@ object JsonUtils {
   }
 
 
-  implicit val employeJsonFormatter: RootJsonFormat[Employee] = DefaultJsonProtocol.jsonFormat2(Employee)
+  implicit val employeJsonFormatter: RootJsonFormat[Employee] = DefaultJsonProtocol.jsonFormat3(Employee)
 
 
    def getJsonValue(result: Seq[Employee]) = {
