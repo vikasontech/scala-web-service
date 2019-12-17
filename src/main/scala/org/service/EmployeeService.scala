@@ -24,7 +24,7 @@ class EmployeeService {
 
   val saveEmployeeData: EmployeeRequest => Unit = (employee: EmployeeRequest) => {
     val employeeDoc:Employee = Employee(name = employee.name, dateOfBirth = LocalDate.parse(employee.dateOfBirth, DateTimeFormatter.ISO_DATE),
-      id = UUID.randomUUID.toString)
+      _id = UUID.randomUUID.toString)
 
     EmployeeRepo.insertData(employeeDoc)
       .onComplete {
@@ -33,10 +33,8 @@ class EmployeeService {
       }
   }
 
-
-
   def findAll: Seq[Employee] = {
-    val value: Future[Seq[Employee]] = Source.future(EmployeeRepo.findAll())
+    val value: Future[Seq[Employee]] = Source.fromFuture(EmployeeRepo.findAll())
       .mapConcat {
         identity
       }

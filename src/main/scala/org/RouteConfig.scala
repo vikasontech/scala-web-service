@@ -3,9 +3,9 @@ package org
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.server.Directives.{delete, get, path, post, put, _}
+import akka.http.scaladsl.server.Directives.{get, path, post, _}
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.{PathDirectives, RouteDirectives}
-import akka.http.scaladsl.server.{Route, StandardRoute}
 import akka.pattern.Patterns
 import akka.stream.ActorMaterializer
 import org.db.doc.Employee
@@ -21,8 +21,6 @@ import org.utils.{JsonUtils, TimeUtils}
 import spray.json.JsValue
 
 import scala.concurrent.Await
-import spray.json.DefaultJsonProtocol._
-import spray.json.RootJsonFormat
 
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
@@ -60,6 +58,6 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
           }
         }
       )
-    }
 
+    }
 }
