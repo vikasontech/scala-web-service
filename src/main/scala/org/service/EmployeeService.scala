@@ -3,17 +3,16 @@ package org.service
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Source
 import org.db.config.EmployeeRepo
 import org.db.doc.Employee
-import akka.stream.scaladsl.{Sink, Source}
 import org.domain.EmployeeRequest
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 
 class EmployeeService {
@@ -33,13 +32,10 @@ class EmployeeService {
       }
   }
 
-  def findAll: Seq[Employee] = {
-    val value: Future[Seq[Employee]] = Source.fromFuture(EmployeeRepo.findAll())
+  def findAll: Source[Employee, NotUsed] = {
+    Source.fromFuture(EmployeeRepo.findAll())
       .mapConcat {
         identity
       }
-      .runWith(Sink.seq[Employee])
-    val value1 = Await.result(value, Duration.create(10, TimeUnit.SECONDS))
-    value1
   }
 }

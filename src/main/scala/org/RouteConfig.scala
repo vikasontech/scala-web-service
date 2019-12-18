@@ -14,30 +14,16 @@ import org.db.doc.Employee
 import org.domain.EmployeeRequest
 import org.user.actor.{EmployeeActor, SAVE, SEARCH_ALL}
 import spray.json.enrichAny
-//import org.db.{Employee, EmployeeActor}
-//import org.service.{EmployeeActor, SEARCH_ALL}
-//import org.user.actor.{UserActivityActor, UserDataActor}
-//import org.user.data.{UserActivity, UserData}
-//import org.user.repositories.UserActivityRepositoryImpl
 import org.utils.{JsonUtils, TimeUtils}
-import spray.json.JsValue
 
 import scala.concurrent.Await
 
 
-//trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
-////    import org.utils.JsonUtils._
-//  implicit val employeeFormat = jsonFormat3(Employee)
-//  implicit val employeeRequestFormat = jsonFormat2(EmployeeRequest)
-//  implicit val empFormat = jsonFormat1(Emp)
-//}
-
 class RouteConfig(implicit val userDataActorRef: ActorRef,
                   implicit val system: ActorSystem) extends JsonUtils{
-  val employeeActor = system.actorOf(Props(new EmployeeActor()))
-//  implicit val employeef = DefaultJsonProtocol.jsonFormat2(Employee)
+  val employeeActor: ActorRef = system.actorOf(Props(new EmployeeActor()))
 
-  implicit val mat = ActorMaterializer()
+  implicit val mat: ActorMaterializer = ActorMaterializer()
 
   val getRoute: Route =
 
@@ -46,9 +32,9 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
         path("find") {
           get {
             val returnValue = Patterns.ask(employeeActor, SEARCH_ALL, TimeUtils.timeoutMills)
-            val result: Seq[Employee] = Await.result(returnValue, TimeUtils.atMostDuration).asInstanceOf[Seq[Employee]]
-            val json: JsValue = getJsonValue(result)
-            RouteDirectives.complete(HttpEntity(json.toString))
+            val resultFuture = Await.result(returnValue, TimeUtils.atMostDuration).asInstanceOf[Source[Employee, NotUsed]]
+            val result = resultFuture.map { it => ByteString.apply(it.toJson.toString().getBytes())}
+            RouteDirectives.complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, result))
           }
         },
         path("save") {
@@ -59,17 +45,8 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
               RouteDirectives.complete(HttpEntity("Data saved successfully!"))
             }
           }
-        },
-        path("find2") {
-
-          get {
-            val response: Source[ByteString, NotUsed] = Source(List(Emp("j"),Emp("s"),Emp("r")))
-              .map{t => ByteString.apply(t.toJson.toString().getBytes())}
-            RouteDirectives.complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, response))
-          }
         }
       )
     }
 }
 
-case class Emp(name:String)

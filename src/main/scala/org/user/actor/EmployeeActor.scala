@@ -1,16 +1,12 @@
 package org.user.actor
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import akka.actor.{Actor, ActorLogging}
-import org.db.doc.Employee
 import org.domain.EmployeeRequest
 import org.service.EmployeeService
 
 
 class EmployeeActor extends Actor with ActorLogging {
-  private val employeeService = new EmployeeService()
+  private val employeeService: EmployeeService = new EmployeeService()
 
   override def receive: Receive = {
 

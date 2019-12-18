@@ -21,15 +21,7 @@ trait JsonUtils extends SprayJsonSupport with DefaultJsonProtocol {
   }
 
 
-  implicit val employeJsonFormatter: RootJsonFormat[Employee] = DefaultJsonProtocol.jsonFormat3(Employee)
-  implicit val empJsonFormatter: RootJsonFormat[Emp] = DefaultJsonProtocol.jsonFormat1(Emp)
-//  implicit val employeeFormat = jsonFormat3(Employee)
-  implicit val employeeRequestFormat = jsonFormat2(EmployeeRequest)
-//  implicit val empFormat = jsonFormat1(Emp)
-
-   def getJsonValue(result: Seq[Employee]): JsValue = {
-    val json: JsValue = result.toJson
-    json
-  }
+  implicit val employeeJsonFormatter: RootJsonFormat[Employee] = DefaultJsonProtocol.jsonFormat3(Employee)
+  implicit val employeeRequestFormat: RootJsonFormat[EmployeeRequest] = jsonFormat2(EmployeeRequest)
 
 }
