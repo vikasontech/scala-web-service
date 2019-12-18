@@ -19,6 +19,10 @@ class EmployeeActor extends Actor with ActorLogging {
       log.info(s"received message find all")
       sender() ! employeeService.findAll
 
+    case UPDATE(emp) =>
+      log.info(s"received message find all")
+      sender() ! employeeService.update(emp)
+
     case _ =>
       log.debug("Unhandled message!")
   }
@@ -29,3 +33,5 @@ sealed trait EmployeeActorMessage
 case class SAVE(emp: EmployeeRequest) extends EmployeeActorMessage
 
 case object SEARCH_ALL extends EmployeeActorMessage
+
+case class UPDATE(emp: EmployeeRequest) extends EmployeeActorMessage

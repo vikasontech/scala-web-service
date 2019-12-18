@@ -12,7 +12,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import org.db.doc.Employee
 import org.domain.EmployeeRequest
-import org.user.actor.{EmployeeActor, SAVE, SEARCH_ALL}
+import org.user.actor.{EmployeeActor, SAVE, SEARCH_ALL, UPDATE}
 import spray.json.enrichAny
 import org.utils.{JsonUtils, TimeUtils}
 
@@ -24,6 +24,7 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
   val employeeActor: ActorRef = system.actorOf(Props(new EmployeeActor()))
 
   implicit val mat: ActorMaterializer = ActorMaterializer()
+
 
   val getRoute: Route =
 
@@ -43,6 +44,15 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
               val future = Patterns.ask(employeeActor, SAVE(employee), TimeUtils.timeoutMills)
               Await.result(future, TimeUtils.atMostDuration)
               RouteDirectives.complete(HttpEntity("Data saved successfully!"))
+            }
+          }
+        },
+        path("update") {
+          put {
+            entity(as[EmployeeRequest]) { employee =>
+              val future = Patterns.ask(employeeActor, UPDATE(employee), TimeUtils.timeoutMills)
+              Await.result(future, TimeUtils.atMostDuration)
+              RouteDirectives.complete(HttpEntity("Data updated saved successfully!"))
             }
           }
         }

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import org.Emp
 import org.db.doc.Employee
 import org.domain.EmployeeRequest
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, enrichAny}

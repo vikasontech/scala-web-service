@@ -1,11 +1,14 @@
 package org.db.config
 
+import org.bson.{BsonDocument, Document}
+import org.bson.codecs.configuration.CodecRegistry
+import org.bson.conversions.Bson
 import org.db.doc.Employee
+import org.mongodb.scala.Completed
 import org.mongodb.scala.model.Filters
-import org.mongodb.scala.{Completed, SingleObservable}
+import org.mongodb.scala.result.UpdateResult
 
 import scala.concurrent.Future
-import org.mongodb.scala
 
 object EmployeeRepo{
 
@@ -31,9 +34,10 @@ object EmployeeRepo{
     DbConfig.employees.find().toFuture()
   }
 
-  def update(emp: Employee): SingleObservable[scala.result.UpdateResult] ={
-//    DbConfig.employees.updateOne( new BsonDocument("_id", BsonString("39c34f1d-30bb-4e39-a92b-b391ca8f9bdb")), emp)
-    DbConfig.employees.replaceOne(Filters.eq("_id", "39c34f1d-30bb-4e39-a92b-b391ca8f9bdb"), emp)
+  def update(emp: Employee):Future[UpdateResult] ={
+    DbConfig.database.getCollection("").findOneAndUpdate(filter =  )
+//    DbConfig.employees.findOneAndUpdate(Filters.eq("name","vikas"), emp)
+//    DbConfig.employees.replaceOne(Filters.eq("name", emp.name), emp).toFuture()
   }
 
 }
