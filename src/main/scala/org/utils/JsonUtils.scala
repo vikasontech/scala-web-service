@@ -3,10 +3,12 @@ package org.utils
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import org.Emp
 import org.db.doc.Employee
+import org.domain.EmployeeRequest
 import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, RootJsonFormat, enrichAny}
-import spray.json.DefaultJsonProtocol._
-object JsonUtils {
+trait JsonUtils extends SprayJsonSupport with DefaultJsonProtocol {
 
   implicit object dateFormatter extends JsonFormat[LocalDate] {
     override def write(obj: LocalDate): JsValue = {
@@ -20,9 +22,12 @@ object JsonUtils {
 
 
   implicit val employeJsonFormatter: RootJsonFormat[Employee] = DefaultJsonProtocol.jsonFormat3(Employee)
+  implicit val empJsonFormatter: RootJsonFormat[Emp] = DefaultJsonProtocol.jsonFormat1(Emp)
+//  implicit val employeeFormat = jsonFormat3(Employee)
+  implicit val employeeRequestFormat = jsonFormat2(EmployeeRequest)
+//  implicit val empFormat = jsonFormat1(Emp)
 
-
-   def getJsonValue(result: Seq[Employee]) = {
+   def getJsonValue(result: Seq[Employee]): JsValue = {
     val json: JsValue = result.toJson
     json
   }
