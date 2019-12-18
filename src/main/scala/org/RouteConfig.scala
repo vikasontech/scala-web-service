@@ -64,7 +64,7 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
 
           get {
             val response: Source[ByteString, NotUsed] = Source(List(Emp("j"),Emp("s"),Emp("r")))
-              .map{t => ByteString.apply(t.toJson.tocString().getBytes())}
+              .map{t => ByteString.apply(t.toJson.toString().getBytes())}
             RouteDirectives.complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, response))
           }
         }
