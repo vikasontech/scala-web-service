@@ -2,12 +2,14 @@ package org.db.config
 
 import org.db.doc.Employee
 import org.mongodb.scala.Completed
+import org.mongodb.scala.bson.conversions.Bson
 import org.utils.JsonUtils
 
 import scala.concurrent.Future
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Updates._
 import org.mongodb.scala.model._
+import org.mongodb.scala.result.DeleteResult
 
 
 object EmployeeRepo extends JsonUtils {
@@ -42,7 +44,12 @@ object EmployeeRepo extends JsonUtils {
         FindOneAndUpdateOptions().upsert(true)).toFuture()
   }
 
-  private def setUpdateJson(emp:Employee) = {
+  def delete(id: String): Future[DeleteResult] = {
+    DbConfig.employees
+      .deleteOne(equal("_id", id)).toFuture()
+  }
+
+  private def setUpdateJson(emp:Employee): Bson = {
     combine(
       set("name", emp.name),
       set("dateOfBirth",emp.dateOfBirth)

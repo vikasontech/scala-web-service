@@ -1,4 +1,1 @@
-{
-        "dateOfBirth": "2019-12-01",
-        "name": "VIKAS VERMA"
-    }
+{ "_id" : "bc39e364-21f9-42a1-9ac5-d081f6a40ba0", "name" : "mamta", "dateOfBirth" : ISODate("1984-08-24T00:00:00Z") }

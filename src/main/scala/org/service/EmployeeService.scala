@@ -11,6 +11,7 @@ import akka.{Done, NotUsed}
 import org.db.config.EmployeeRepo
 import org.db.doc.Employee
 import org.domain.EmployeeRequest
+import org.mongodb.scala.result.DeleteResult
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
@@ -49,5 +50,10 @@ class EmployeeService {
     val future: Future[Employee] = EmployeeRepo.update(emp = employeeDoc, id)
     val result: Employee = Await.result(future, 2.seconds)
     println(s"Number of record matched: ${result}")
+  }
+
+  def delete(id: String): Future[DeleteResult] ={
+    EmployeeRepo.delete(id)
+//    println(s"Total Row deleted: ${Await.result(EmployeeRepo.delete(id), 2.second).getDeletedCount()}")
   }
 }

@@ -12,15 +12,15 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import org.db.doc.Employee
 import org.domain.EmployeeRequest
-import org.user.actor.{EmployeeActor, SAVE, SEARCH_ALL, UPDATE}
-import spray.json.enrichAny
+import org.user.actor._
 import org.utils.{JsonUtils, TimeUtils}
+import spray.json.enrichAny
 
 import scala.concurrent.Await
 
 
 class RouteConfig(implicit val userDataActorRef: ActorRef,
-                  implicit val system: ActorSystem) extends JsonUtils{
+                  implicit val system: ActorSystem) extends JsonUtils {
   val employeeActor: ActorRef = system.actorOf(Props(new EmployeeActor()))
 
   implicit val mat: ActorMaterializer = ActorMaterializer()
@@ -34,7 +34,7 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
           get {
             val returnValue = Patterns.ask(employeeActor, SEARCH_ALL, TimeUtils.timeoutMills)
             val resultFuture = Await.result(returnValue, TimeUtils.atMostDuration).asInstanceOf[Source[Employee, NotUsed]]
-            val result = resultFuture.map { it => ByteString.apply(it.toJson.toString().getBytes())}
+            val result = resultFuture.map { it => ByteString.apply(it.toJson.toString().getBytes()) }
             RouteDirectives.complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, result))
           }
         },
@@ -50,12 +50,21 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
         path("update") {
           put {
             parameter("id") { id =>
-              println(s"id value is: $id")
               entity(as[EmployeeRequest]) { employee =>
                 val future = Patterns.ask(employeeActor, UPDATE(employee, id), TimeUtils.timeoutMills)
                 Await.result(future, TimeUtils.atMostDuration)
                 RouteDirectives.complete(HttpEntity("Data updated saved successfully!"))
               }
+            }
+          }
+        },
+
+        path("delete") {
+          delete {
+            parameter("id") { id =>
+              val resultFuture = Patterns.ask(employeeActor, DELETE(id), TimeUtils.timeoutMills)
+              Await.result(resultFuture, TimeUtils.atMostDuration)
+              RouteDirectives.complete(HttpEntity(s"Data updated saved successfully!"))
             }
           }
         }
