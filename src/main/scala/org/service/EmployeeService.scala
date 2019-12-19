@@ -4,17 +4,16 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
+import akka.{Done, NotUsed}
 import org.db.config.EmployeeRepo
 import org.db.doc.Employee
 import org.domain.EmployeeRequest
-import org.mongodb.scala.result.UpdateResult
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContextExecutor}
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 
 class EmployeeService {
@@ -29,7 +28,7 @@ class EmployeeService {
     EmployeeRepo.insertData(employeeDoc)
       .onComplete {
         case Failure(exception) => println(exception.getLocalizedMessage)
-        case Success(_) => None
+        case Success(_) => Done
       }
   }
 
@@ -47,14 +46,8 @@ class EmployeeService {
 
   def update(employeeRequest:EmployeeRequest): Unit = {
     val employeeDoc:Employee = employeeMapperWithNewID(employeeRequest)
-
-    val future = EmployeeRepo.update(emp = employeeDoc)
-    val result: UpdateResult = Await.result(future, Duration.Inf)
-    println(s"Number of record matched: ${result.getMatchedCount}")
-    println(s"Number of record updated: ${result.getModifiedCount}")
-//      .onComplete {
-//        case Failure(exception) => println(exception.getLocalizedMessage)
-//        case Success(v)=> println(s"data saved with message $v")
-//      }
+    val future: Future[Employee] = EmployeeRepo.update(emp = employeeDoc)
+    val result: Employee = Await.result(future, 2.seconds)
+    println(s"Number of record matched: ${result}")
   }
 }
