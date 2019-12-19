@@ -19,9 +19,9 @@ class EmployeeActor extends Actor with ActorLogging {
       log.info(s"received message find all")
       sender() ! employeeService.findAll
 
-    case UPDATE(emp) =>
+    case UPDATE(emp,id) =>
       log.info(s"received message find all")
-      sender() ! employeeService.update(emp)
+      sender() ! employeeService.update(emp,id)
 
     case _ =>
       log.debug("Unhandled message!")
@@ -34,4 +34,4 @@ case class SAVE(emp: EmployeeRequest) extends EmployeeActorMessage
 
 case object SEARCH_ALL extends EmployeeActorMessage
 
-case class UPDATE(emp: EmployeeRequest) extends EmployeeActorMessage
+case class UPDATE(emp: EmployeeRequest, id: String) extends EmployeeActorMessage

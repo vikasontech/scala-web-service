@@ -5,6 +5,10 @@ import org.mongodb.scala.Completed
 import org.utils.JsonUtils
 
 import scala.concurrent.Future
+import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Updates._
+import org.mongodb.scala.model._
+
 
 object EmployeeRepo extends JsonUtils {
 
@@ -30,13 +34,18 @@ object EmployeeRepo extends JsonUtils {
     DbConfig.employees.find().toFuture()
   }
 
-  def update(emp: Employee):Future[Employee] = {
-    import org.mongodb.scala.model.Filters._
-    import org.mongodb.scala.model.Updates._
-    import org.mongodb.scala.model._
+  def update(emp: Employee, id: String):Future[Employee] = {
 
     DbConfig.employees
-      .findOneAndUpdate(equal("_id", "bc39e364-21f9-42a1-9ac5-d081f6a40ba0"),
-        set("name","mamta"), FindOneAndUpdateOptions().upsert(true)).toFuture()
+      .findOneAndUpdate(equal("_id", id),
+        setUpdateJson(emp),
+        FindOneAndUpdateOptions().upsert(true)).toFuture()
+  }
+
+  private def setUpdateJson(emp:Employee) = {
+    combine(
+      set("name", emp.name),
+      set("dateOfBirth",emp.dateOfBirth)
+    )
   }
 }

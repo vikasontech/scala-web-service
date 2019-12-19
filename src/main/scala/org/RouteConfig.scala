@@ -49,10 +49,13 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
         },
         path("update") {
           put {
-            entity(as[EmployeeRequest]) { employee =>
-              val future = Patterns.ask(employeeActor, UPDATE(employee), TimeUtils.timeoutMills)
-              Await.result(future, TimeUtils.atMostDuration)
-              RouteDirectives.complete(HttpEntity("Data updated saved successfully!"))
+            parameter("id") { id =>
+              println(s"id value is: $id")
+              entity(as[EmployeeRequest]) { employee =>
+                val future = Patterns.ask(employeeActor, UPDATE(employee, id), TimeUtils.timeoutMills)
+                Await.result(future, TimeUtils.atMostDuration)
+                RouteDirectives.complete(HttpEntity("Data updated saved successfully!"))
+              }
             }
           }
         }

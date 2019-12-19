@@ -44,9 +44,9 @@ class EmployeeService {
       }
   }
 
-  def update(employeeRequest:EmployeeRequest): Unit = {
+  def update(employeeRequest:EmployeeRequest, id: String): Unit = {
     val employeeDoc:Employee = employeeMapperWithNewID(employeeRequest)
-    val future: Future[Employee] = EmployeeRepo.update(emp = employeeDoc)
+    val future: Future[Employee] = EmployeeRepo.update(emp = employeeDoc, id)
     val result: Employee = Await.result(future, 2.seconds)
     println(s"Number of record matched: ${result}")
   }
