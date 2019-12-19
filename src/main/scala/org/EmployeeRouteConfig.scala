@@ -10,7 +10,7 @@ import akka.pattern.Patterns
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import org.db.doc.Employee
+import org.db.data.Employee
 import org.domain.EmployeeRequest
 import org.user.actor._
 import org.utils.{JsonUtils, TimeUtils}
@@ -19,8 +19,7 @@ import spray.json.enrichAny
 import scala.concurrent.Await
 
 
-class RouteConfig(implicit val userDataActorRef: ActorRef,
-                  implicit val system: ActorSystem) extends JsonUtils {
+class EmployeeRouteConfig(implicit val system: ActorSystem) extends JsonUtils {
   val employeeActor: ActorRef = system.actorOf(Props(new EmployeeActor()))
 
   implicit val mat: ActorMaterializer = ActorMaterializer()
@@ -30,15 +29,7 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
 
     PathDirectives.pathPrefix("user") {
       concat(
-        path("find") {
-          get {
-            val returnValue = Patterns.ask(employeeActor, SEARCH_ALL, TimeUtils.timeoutMills)
-            val resultFuture = Await.result(returnValue, TimeUtils.atMostDuration).asInstanceOf[Source[Employee, NotUsed]]
-            val result = resultFuture.map { it => ByteString.apply(it.toJson.toString().getBytes()) }
-            RouteDirectives.complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, result))
-          }
-        },
-        path("save") {
+        path("create") {
           post {
             entity(as[EmployeeRequest]) { employee =>
               val future = Patterns.ask(employeeActor, SAVE(employee), TimeUtils.timeoutMills)
@@ -47,6 +38,16 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
             }
           }
         },
+
+        path("search") {
+          get {
+            val resultFuture = Patterns.ask(employeeActor, SEARCH_ALL, TimeUtils.timeoutMills)
+            val resultSource = Await.result(resultFuture, TimeUtils.atMostDuration).asInstanceOf[Source[Employee, NotUsed]]
+            val resultByteString = resultSource.map { it => ByteString.apply(it.toJson.toString.getBytes()) }
+            RouteDirectives.complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, resultByteString))
+          }
+        },
+
         path("update") {
           put {
             parameter("id") { id =>
@@ -71,4 +72,3 @@ class RouteConfig(implicit val userDataActorRef: ActorRef,
       )
     }
 }
-

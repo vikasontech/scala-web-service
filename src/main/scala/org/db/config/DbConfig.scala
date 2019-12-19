@@ -5,7 +5,7 @@ import ch.rasc.bsoncodec.time.LocalDateTimeDateCodec
 import com.mongodb.MongoCredential.createCredential
 import com.mongodb.{MongoCredential, ServerAddress}
 import org.bson.codecs.configuration.CodecRegistry
-import org.db.doc.Employee
+import org.db.data.Employee
 import org.mongodb.scala.MongoClientSettings
 
 import scala.collection.JavaConverters.seqAsJavaListConverter

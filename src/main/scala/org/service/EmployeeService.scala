@@ -4,18 +4,17 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import akka.{Done, NotUsed}
-import org.db.config.EmployeeRepo
-import org.db.doc.Employee
+import org.db.data.Employee
 import org.domain.EmployeeRequest
+import org.mongodb.scala.Completed
 import org.mongodb.scala.result.DeleteResult
+import org.user.repositories.EmployeeRepo
 
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, ExecutionContextExecutor, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ExecutionContextExecutor, Future}
 
 class EmployeeService {
 
@@ -23,19 +22,10 @@ class EmployeeService {
   implicit val ec: ExecutionContextExecutor = actorSystem.dispatcher
   implicit val mat: ActorMaterializer = ActorMaterializer()
 
-  val saveEmployeeData: EmployeeRequest => Unit = (employeeRequest: EmployeeRequest) => {
+  def saveEmployeeData: EmployeeRequest => Future[Completed] = (employeeRequest: EmployeeRequest) => {
     val employeeDoc:Employee = employeeMapperWithNewID(employeeRequest)
 
     EmployeeRepo.insertData(employeeDoc)
-      .onComplete {
-        case Failure(exception) => println(exception.getLocalizedMessage)
-        case Success(_) => Done
-      }
-  }
-
-  private def employeeMapperWithNewID(employee: EmployeeRequest) = {
-    Employee(name = employee.name, dateOfBirth = LocalDate.parse(employee.dateOfBirth, DateTimeFormatter.ISO_DATE),
-      _id = UUID.randomUUID.toString)
   }
 
   def findAll: Source[Employee, NotUsed] = {
@@ -45,15 +35,16 @@ class EmployeeService {
       }
   }
 
-  def update(employeeRequest:EmployeeRequest, id: String): Unit = {
+  def update(employeeRequest:EmployeeRequest, id: String): Future[Employee] = {
     val employeeDoc:Employee = employeeMapperWithNewID(employeeRequest)
-    val future: Future[Employee] = EmployeeRepo.update(emp = employeeDoc, id)
-    val result: Employee = Await.result(future, 2.seconds)
-    println(s"Number of record matched: ${result}")
+    EmployeeRepo.update(emp = employeeDoc, id)
   }
 
   def delete(id: String): Future[DeleteResult] ={
     EmployeeRepo.delete(id)
-//    println(s"Total Row deleted: ${Await.result(EmployeeRepo.delete(id), 2.second).getDeletedCount()}")
+  }
+  private def employeeMapperWithNewID(employee: EmployeeRequest) = {
+    Employee(name = employee.name, dateOfBirth = LocalDate.parse(employee.dateOfBirth, DateTimeFormatter.ISO_DATE),
+      _id = UUID.randomUUID.toString)
   }
 }

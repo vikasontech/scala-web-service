@@ -1,16 +1,16 @@
-package org.db.config
+package org.user.repositories
 
-import org.db.doc.Employee
+import org.db.config.DbConfig
+import org.db.data.Employee
 import org.mongodb.scala.Completed
 import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.FindOneAndUpdateOptions
+import org.mongodb.scala.model.Updates.{combine, set}
+import org.mongodb.scala.result.DeleteResult
 import org.utils.JsonUtils
 
 import scala.concurrent.Future
-import org.mongodb.scala.model.Filters._
-import org.mongodb.scala.model.Updates._
-import org.mongodb.scala.model._
-import org.mongodb.scala.result.DeleteResult
-
 
 object EmployeeRepo extends JsonUtils {
 
